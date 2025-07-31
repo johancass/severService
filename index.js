@@ -3,6 +3,7 @@ const pool = require('./db');
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formulario
 
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
