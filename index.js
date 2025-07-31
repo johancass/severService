@@ -40,7 +40,7 @@ app.get('/ver_env', (req, res) => {
 });
 // Ruta para consultar estado
 app.get('/estado_pago', async (req, res) => {
-const { codigo } =req.query;
+const { codigo } =req.query || req.body;
 
   try {
     const resultado = await pool.query(
