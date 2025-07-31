@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
   res.send('Servidor activo. Usa POST /guardar_pago para enviar datos.');
 });
 // Ruta para recibir los datos del ESP32
-app.post('/crear_pago', (req, res) => {
+app.get('/crear_pago', (req, res) => {
    res.send('Servidor activo. Usa /crear_pagopara enviar datos.');
 });
 app.listen(PORT, () => {
