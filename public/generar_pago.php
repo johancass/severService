@@ -4,9 +4,9 @@
 header('Content-Type: application/json');
 
 // Datos del comercio
-$apiKey = 'TU_API_KEY';
-$merchantId = 'TU_MERCHANT_ID';
-$accountId = 'TU_ACCOUNT_ID';
+$apiKey = 'I29W9AhcDED95Gzg80k87YzinF';
+$merchantId = 'G8xjCg8EkTIc37s';
+$accountId = '1027555';
 $refVenta = 'ORD_' . time();  // Referencia única
 $valor = "5000"; // Monto en COP
 $descripcion = "Servicio automático";
