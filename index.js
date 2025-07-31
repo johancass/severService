@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 1000;
 app.use(bodyParser.json());
 
 // Ruta para recibir los datos del ESP32
-app.post('/crear_pago', async (req, res) => {
+app.post('/crear_pago', (req, res) => {
    res.send('Servidor activo. Usa /crear_pagopara enviar datos.');
 });
 
