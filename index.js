@@ -8,7 +8,8 @@ app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formular
 
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
-  const { id_pago, valor } = req.body;
+  const codigo = req.query.codigo || req.body.codigo;
+
  const estado="pendiente";
   if (!id_pago || !valor) {
 return res.status(404).json({ ok: false, mensaje: `Código ${codigo} no encontrado` });
