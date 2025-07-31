@@ -1,49 +1,54 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const cors = require('cors');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-const DB_FILE = 'pagos.json';
-
-// Utilidad para leer archivo JSON de pagos
-function leerPagos() {
-  if (!fs.existsSync(DB_FILE)) return {};
-  return JSON.parse(fs.readFileSync(DB_FILE));
-}
-
-// Guardar pago
-app.post('/guardar_pago', (req, res) => {
+// Ruta para recibir los datos del ESP32
+app.post('/guardar_pago', async (req, res) => {
   const { id_pago, valor, estado } = req.body;
 
-  if (!id_pago || !valor) {
-    return res.status(400).send('Faltan datos');
+  if (!id_pago || !valor || !estado) {
+    return res.status(400).json({ error: 'Faltan datos' });
   }
 
-  const pagos = leerPagos();
-  pagos[id_pago] = { valor, estado: estado || 'pendiente' };
+  try {
+    // ENVÍA los datos al script PHP de FreeHosting
+    const response = await fetch('https://jcmanosenresina.unaux.com/guardar_pago.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({
+        id_pago,
+        valor,
+        estado
+      })
+    });
 
-  fs.writeFileSync(DB_FILE, JSON.stringify(pagos, null, 2));
-  res.json({ status: 'ok', id: id_pago });
+    const respuesta = await response.text();
+
+    console.log('Respuesta desde FreeHosting:', respuesta);
+
+    res.status(200).json({
+      exito: true,
+      mensaje: 'Datos reenviados correctamente al servidor FreeHosting',
+      respuesta_php: respuesta
+    });
+
+  } catch (error) {
+    console.error('Error al reenviar datos:', error.message);
+    res.status(500).json({ error: 'Error al enviar datos a FreeHosting' });
+  }
 });
 
-// Consultar estado
-app.get('/estado_pago/:id', (req, res) => {
-  const pagos = leerPagos();
-  const id = req.params.id;
-
-  if (pagos[id]) {
-    res.json({ id, ...pagos[id] });
-  } else {
-    res.status(404).json({ error: 'Pago no encontrado' });
-  }
+// Ruta raíz opcional para ver si el servidor responde
+app.get('/', (req, res) => {
+  res.send('Servidor activo. Usa POST /guardar_pago para enviar datos.');
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
+  console.log(`Servidor escuchando en el puerto ${PORT}`);
 });
