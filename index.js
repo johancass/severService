@@ -40,8 +40,16 @@ app.get('/ver_env', (req, res) => {
   res.json({ database_url: process.env.DATABASE_URL });
 });
 // Ruta para consultar estado
-app.get('/estado_pago', async (req, res) => {
-const { codigo } =req.query || req.body;
+app.all('/estado_pago', async (req, res) => {
+  // Aceptar desde query o body
+  const codigo = req.query.codigo || req.body.codigo;
+
+  if (!codigo) {
+    return res.status(400).json({
+      ok: false,
+      mensaje: 'Falta el parámetro "codigo"'
+    });
+  }
 
   try {
     const resultado = await pool.query(
@@ -50,17 +58,24 @@ const { codigo } =req.query || req.body;
     );
 
     if (resultado.rows.length === 0) {
-      return res.status(404).json({ ok: false, mensaje: 'codigo $1 No encontrado' [codigo] });
+      return res.status(404).json({
+        ok: false,
+        mensaje: `Código "${codigo}" no encontrado`
+      });
     }
 
-    res.json({ ok: true, data: resultado.rows[0] });
+    res.json({
+      ok: true,
+      data: resultado.rows[0]
+    });
+
   } catch (error) {
-    console.error('Error al consultar pago:', error.message);
-    res.status(500).json({ ok: false, error: 'Error al consultar el pago' });
+    console.error('Error al consultar el pago:', error.message);
+    res.status(500).json({
+      ok: false,
+      error: 'Error al consultar el pago'
+    });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor en puerto ${PORT}`);
-});
+
