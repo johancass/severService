@@ -1,4 +1,4 @@
-
+require('dotenv').config();
 const express = require('express');
 const pool = require('./db');
 const app = express();
@@ -8,12 +8,10 @@ app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formular
 
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
-  const codigo = req.query.codigo || req.body.codigo;
-
+  const { id_pago, valor } = req.body;
  const estado="pendiente";
   if (!id_pago || !valor) {
-return res.status(404).json({ ok: false, mensaje: `Código ${codigo} no encontrado` });
-
+    return res.status(400).json({ ok: false, error: 'Faltan datos' });
   }
 
   try {
@@ -28,16 +26,13 @@ return res.status(404).json({ ok: false, mensaje: `Código ${codigo} no encontra
   }
 });
 app.get('/test_db', async (req, res) => {
+console.log("Tu variable:", process.env.DATABASE_URL);
  try {
     const resultado = await pool.query('SELECT NOW()');
     res.json({ ok: true, hora: resultado.rows[0] });
   } catch (err) {
-    res.json({ ok: false, error: err.message});
-
+    res.json({ ok: false, error: err.message });
   }
-});
-app.get('/ver_env', (req, res) => {
-  res.json({ database_url: process.env.DATABASE_URL });
 });
 // Ruta para consultar estado
 app.get('/estado_pago', async (req, res) => {
@@ -75,6 +70,10 @@ app.get('/estado_pago', async (req, res) => {
       error: 'Error al consultar el pago'
     });
   }
+});
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor en puerto ${PORT}`);
 });
 
 
