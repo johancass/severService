@@ -4,6 +4,9 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const app = express();
 
+// Middleware para manejar JSON y formularios
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // Configura tu base de datos (usa tus datos de ByetHost)
 const dbConfig = {
   host: 'sql201.byetcluster.com',
@@ -12,8 +15,7 @@ const dbConfig = {
   database: 'ezyro_39500373_datacont',
 };
 
-// Middleware para leer JSON
-app.use(express.json());
+
 
 // Ruta de prueba
 app.get('/', (req, res) => {
@@ -27,7 +29,7 @@ app.post('/crear_pago', async (req, res) => {
 
   // Validación básica
   if (!id_pago || !valor) {
-    return res.status(400).json({ exito: false, mensaje: 'Faltan datos' });
+    return res.status(400).json({ exito: false, mensaje: 'Faltan datos', recibido: req.body });
   }
 
   try {
