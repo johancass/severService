@@ -1,8 +1,8 @@
-require('dotenv').config();
+
 const express = require('express');
 const pool = require('./db');
 const app = express();
-
+require('dotenv').config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formulario
 
