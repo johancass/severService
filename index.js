@@ -1,38 +1,50 @@
 // index.js
+
 const express = require('express');
-const db = require('./db'); // ← conexión a la base de datos
+const mysql = require('mysql2/promise');
 const app = express();
-const PORT = process.env.PORT || 4000;
 
+// Configura tu base de datos (usa tus datos de ByetHost)
+const dbConfig = {
+  host: 'sql201.byetcluster.com',
+  user: 'ezyro_39500373',
+  password: 'TU_CONTRASEÑA_AQUÍ', // ← reemplaza esto
+  database: 'ezyro_39500373_datacont',
+};
+
+// Middleware para leer JSON
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Endpoint para guardar un nuevo pago
+// Ruta de prueba
+app.get('/', (req, res) => {
+  res.send('Servidor activo. Usa POST en /crear_pago para guardar pagos.');
+});
+
+// Ruta para guardar el pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
   const estado = 'pendiente';
 
+  // Validación básica
   if (!id_pago || !valor) {
-    return res.status(400).json({ error: 'Faltan datos' });
+    return res.status(400).json({ exito: false, mensaje: 'Faltan datos' });
   }
 
   try {
+    const connection = await mysql.createConnection(dbConfig);
     const sql = 'INSERT INTO pagos (id_pago, valor, estado) VALUES (?, ?, ?)';
-    await db.query(sql, [id_pago, valor, estado]);
-    res.json({ exito: true, mensaje: 'Pago guardado correctamente' });
+    await connection.execute(sql, [id_pago, valor, estado]);
+    await connection.end();
+
+    res.json({ exito: true, mensaje: 'Pago guardado exitosamente en la base de datos.' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ exito: false, error: 'Error al guardar en base de datos' });
+    console.error('Error al guardar:', error.message);
+    res.status(500).json({ exito: false, mensaje: 'Error al guardar en la base de datos.' });
   }
 });
 
+// Puerto
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
-});
-// Ruta para recibir los datos del ESP32
-app.get('/crear_pago', (req, res) => {
-   res.send('Servidor activo. Usa /crear_pagopara enviar datos.');
-});
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
