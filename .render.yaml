@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: servidor-php
-    env: docker
-    plan: free
-    branch: main
-    dockerfilePath: ./Dockerfile
