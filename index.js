@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Ruta raíz opcional para ver si el servidor responde
 app.get('/', (req, res) => {
-  res.send('Servidor activo. Usa POSdvdvT /guardar_pago para enviar datos.');
+  res.send('Servidor activo.');
 });
 
 app.post('/crear_pago', async (req, res) => {
