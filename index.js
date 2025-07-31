@@ -26,6 +26,7 @@ app.post('/crear_pago', async (req, res) => {
   }
 });
 app.get('/test_db', async (req, res) => {
+console.log("Tu variable:", process.env.DATABASE_URL);
  try {
     const resultado = await pool.query('SELECT NOW()');
     res.json({ ok: true, hora: resultado.rows[0] });
