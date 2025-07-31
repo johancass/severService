@@ -20,7 +20,7 @@ app.post('/crear_pago', async (req, res) => {
   if (!id_pago || !valor ) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
-  const estado="pen";
+
   try {
     // ENVÍA los datos al script PHP de FreeHosting
     const response = await fetch('https://jcmanosenresina.unaux.com/guardar_pago.php', {
@@ -30,8 +30,7 @@ app.post('/crear_pago', async (req, res) => {
       },
       body: new URLSearchParams({
         id_pago,
-        valor,
-        estado
+        valor
       })
     });
 
