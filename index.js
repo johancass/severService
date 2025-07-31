@@ -29,8 +29,12 @@ app.get('/test_db', async (req, res) => {
     const result = await pool.query('SELECT 1+1 AS resultado');
     res.send(`✅ Conexión exitosa. Resultado: ${result.rows[0].resultado}`);
   } catch (err) {
-    console.error("❌ Error en conexión:", err);
-    res.status(500).send("❌ Error al conectar con la base de datos");
+  console.error("❌ Error al guardar el pago:", err.message);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'Error al guardar el pago',
+      detalle: err.message  // Aquí va el mensaje real
+    });
   }
 });
 // Ruta para consultar estado
