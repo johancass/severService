@@ -1,8 +1,8 @@
-
+require('dotenv').config();
 const express = require('express');
 const pool = require('./db');
 const app = express();
-require('dotenv').config();
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formulario
 
@@ -30,9 +30,12 @@ app.get('/test_db', async (req, res) => {
     const resultado = await pool.query('SELECT NOW()');
     res.json({ ok: true, hora: resultado.rows[0] });
   } catch (err) {
-    res.json({ ok: false, error: err.message,variable: process.env.DATABASE_URL });
+    res.json({ ok: false, error: err.message});
 
   }
+});
+app.get('/ver_env', (req, res) => {
+  res.json({ database_url: process.env.DATABASE_URL });
 });
 // Ruta para consultar estado
 app.get('/estado_pago/:codigo', async (req, res) => {
