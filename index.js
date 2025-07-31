@@ -1,53 +1,33 @@
+// index.js
 const express = require('express');
-const bodyParser = require('body-parser');
-
+const db = require('./db'); // ← conexión a la base de datos
 const app = express();
 const PORT = process.env.PORT || 4000;
-
-//app.use(bodyParser.json());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta raíz opcional para ver si el servidor responde
-app.get('/', (req, res) => {
-  res.send('Servidor activo.');
-});
-
+// Endpoint para guardar un nuevo pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
+  const estado = 'pendiente';
 
-  if (!id_pago || !valor ) {
+  if (!id_pago || !valor) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
 
   try {
-    // ENVÍA los datos al script PHP de FreeHosting
-    const response = await fetch('https://jcmanosenresina.unaux.com/guardar_pago.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: new URLSearchParams({
-        id_pago,
-        valor
-      })
-    });
-
-    const respuesta = await response.text();
-
-    console.log('Respuesta desde FreeHosting:', respuesta);
-
-    res.status(200).json({
-      exito: true,
-      mensaje: 'Datos reenviados correctamente al servidor FreeHosting',
-      respuesta_php: respuesta
-    });
-
+    const sql = 'INSERT INTO pagos (id_pago, valor, estado) VALUES (?, ?, ?)';
+    await db.query(sql, [id_pago, valor, estado]);
+    res.json({ exito: true, mensaje: 'Pago guardado correctamente' });
   } catch (error) {
-    console.error('Error al reenviar datos:', error.message);
-    res.status(500).json({ error: 'Error al enviar datos a FreeHosting' });
+    console.error(error);
+    res.status(500).json({ exito: false, error: 'Error al guardar en base de datos' });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
 // Ruta para recibir los datos del ESP32
 app.get('/crear_pago', (req, res) => {
