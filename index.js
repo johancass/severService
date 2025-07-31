@@ -8,7 +8,7 @@ const app = express();
 const dbConfig = {
   host: 'sql201.byetcluster.com',
   user: 'ezyro_39500373',
-  password: 'TU_CONTRASEÑA_AQUÍ', // ← reemplaza esto
+  password: '35e8e5231a7', // ← reemplaza esto
   database: 'ezyro_39500373_datacont',
 };
 
