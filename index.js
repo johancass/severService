@@ -42,7 +42,7 @@ app.get('/ver_env', (req, res) => {
 // Ruta para consultar estado
 app.all('/estado_pago', async (req, res) => {
   // Aceptar desde query o body
-  const codigo = req.query.codigo || req.body.codigo;
+  const codigo = req.query.codigoin || req.body.codigoin;
 
   if (!codigo) {
     return res.status(400).json({
