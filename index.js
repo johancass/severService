@@ -40,14 +40,13 @@ app.get('/ver_env', (req, res) => {
   res.json({ database_url: process.env.DATABASE_URL });
 });
 // Ruta para consultar estado
-app.all('/estado_pago', async (req, res) => {
-  // Aceptar desde query o body
-  const codigo = req.query.codigoin || req.body.codigoin;
+app.get('/estado_pago', async (req, res) => {
+  const codigo = req.query.codigoin;
 
   if (!codigo) {
     return res.status(400).json({
       ok: false,
-      mensaje: 'Falta el parámetro "codigo"'
+      mensaje: 'Falta el parámetro "codigoin"'
     });
   }
 
