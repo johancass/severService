@@ -40,9 +40,14 @@ app.post('/crear_pago', async (req, res) => {
 
     res.json({ exito: true, mensaje: 'Pago guardado exitosamente en la base de datos.' });
   } catch (error) {
-    console.error('Error al guardar:', error.message);
-    res.status(500).json({ exito: false, mensaje: 'Error al guardar en la base de datos.' });
-  }
+  console.error('Error al guardar en la base de datos:', error);
+  res.status(500).json({
+    exito: false,
+    mensaje: 'Error al guardar en la base de datos.',
+    detalle: error.message,  // o error.sqlMessage si prefieres
+    codigo: error.code        // error de MySQL como 'ER_DUP_ENTRY'
+  });
+}
 });
 
 // Puerto
