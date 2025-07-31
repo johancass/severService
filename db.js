@@ -1,14 +1,10 @@
-// db.js
-const mysql = require('mysql2/promise');
+const { Pool } = require('pg');
 
-const connection = mysql.createPool({
-  host: 'sql201.byetcluster.com',
-  user: 'TU_USUARIO',
-  password: 'TU_PASSWORD',
-  database: 'ezyro_39500373_datacont',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false, // obligatorio para Neon
+  },
 });
 
-module.exports = connection
+module.exports = pool;
