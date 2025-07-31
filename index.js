@@ -5,17 +5,17 @@ const app = express();
 app.use(express.json());
 
 // Ruta para registrar un pago
-app.post('/guardar_pago', async (req, res) => {
-  const { codigo, valor, estado } = req.body;
-
-  if (!codigo || !valor || !estado) {
+app.post('/crear_pago', async (req, res) => {
+  const { id_pago, valor } = req.body;
+ const estado="pendiente";
+  if (!id_pago || !valor) {
     return res.status(400).json({ ok: false, error: 'Faltan datos' });
   }
 
   try {
     const resultado = await pool.query(
       'INSERT INTO pagos (codigo, valor, estado) VALUES ($1, $2, $3) RETURNING *',
-      [codigo, valor, estado]
+      [id_pago, valor, estado]
     );
     res.json({ ok: true, data: resultado.rows[0] });
   } catch (error) {
