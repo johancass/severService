@@ -26,16 +26,11 @@ app.post('/crear_pago', async (req, res) => {
   }
 });
 app.get('/test_db', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT 1+1 AS resultado');
-    res.send(`✅ Conexión exitosa. Resultado: ${result.rows[0].resultado}`);
+ try {
+    const resultado = await pool.query('SELECT NOW()');
+    res.json({ ok: true, hora: resultado.rows[0] });
   } catch (err) {
-  console.error("❌ Error al guardar el pago:", err.message);
-    res.status(500).json({ 
-      ok: false, 
-      error: 'Error al guardar el pago',
-      detalle: err.message  // Aquí va el mensaje real
-    });
+    res.json({ ok: false, error: err.message });
   }
 });
 // Ruta para consultar estado
