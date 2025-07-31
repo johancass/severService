@@ -26,7 +26,7 @@ $options = [
 $context  = stream_context_create($options);
 
 // Cambia esta URL a tu dominio real en FreeHosting
-$url = "https://tusitio.freehost.com/guardar_pago.php";
+$url = "https://jcmanosenresina.unaux.com/guardar_pago.php";
 $result = file_get_contents($url, false, $context);
 
 if ($result === FALSE) {
