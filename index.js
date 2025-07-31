@@ -30,8 +30,8 @@ app.get('/test_db', async (req, res) => {
     const resultado = await pool.query('SELECT NOW()');
     res.json({ ok: true, hora: resultado.rows[0] });
   } catch (err) {
-    res.json({ ok: false, error: err.message });
-res.json("Tu variable:", process.env.DATABASE_URL);
+    res.json({ ok: false, error: err.message,variable: process.env.DATABASE_URL });
+
   }
 });
 // Ruta para consultar estado
