@@ -39,8 +39,8 @@ app.get('/ver_env', (req, res) => {
   res.json({ database_url: process.env.DATABASE_URL });
 });
 // Ruta para consultar estado
-app.get('/estado_pago/:codigo', async (req, res) => {
-const codigo = req.body.codigo || req.query.codigo;
+app.get('/estado_pago', async (req, res) => {
+const { codigo } = req.body;
 
   try {
     const resultado = await pool.query(
