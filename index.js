@@ -1,6 +1,9 @@
 
 const express = require('express');
 const pool = require('./db');
+const express = require('express');
+const axios = require('axios');
+const crypto = require('crypto');
 const app = express();
 
 app.use(express.json());
@@ -72,12 +75,7 @@ app.get('/estado_pago', async (req, res) => {
   }
 });
 // server.js
-const express = require('express');
-const axios = require('axios');
-const crypto = require('crypto');
-const app = express();
 
-app.use(express.json());
 
 app.post('/generar_pago', async (req, res) => {
   const { referenceCode, amount } = req.body;
@@ -161,9 +159,6 @@ app.post('/generar_pago', async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Servidor corriendo en puerto 3000');
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
