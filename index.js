@@ -12,6 +12,50 @@ app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formular
 app.get('/', (req, res) => {
   res.json({ mensaje: 'Servidor activo' });
 });
+// Ruta directa: /estado_pago?ref=XXXXXX
+app.get('/estado_pago', async (req, res) => {
+  const referencia = req.query.ref;
+
+  if (!referencia) {
+    return res.status(400).json({ error: 'Referencia requerida' });
+  }
+
+  const url = 'https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi'; // cambia a producción si aplica
+
+  const body = {
+    test: false,
+    language: 'es',
+    command: 'ORDER_DETAIL_BY_REFERENCE_CODE',
+    merchant: {
+      apiKey: API_KEY,
+      apiLogin: API_LOGIN
+    },
+    details: {
+      referenceCode: referencia
+    }
+  };
+
+  try {
+    const respuesta = await axios.post(url, body, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    const resultado = respuesta.data;
+
+    if (!resultado.result || !resultado.result.payload) {
+      return res.status(404).json({ estado: 'NO_ENCONTRADO' });
+    }
+
+    const pago = resultado.result.payload;
+    const estadoPago = pago.transactions?.[0]?.transactionResponse?.state || 'PENDING';
+
+    return res.json({ estado: estadoPago });
+  } catch (err) {
+    console.error('Error al consultar estado:', err.message);
+    return res.status(500).json({ error: 'Error al consultar el estado del pago' });
+  }
+});
+
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
