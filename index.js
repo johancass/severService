@@ -78,87 +78,47 @@ app.get('/estado_pago', async (req, res) => {
   }
 });
 
-app.post('/generar_pago', async (req, res) => {
-  const { referenceCode, amount } = req.body;
+const merchantId = "1018562"; // Tu merchantId real
+const accountId = "1027555";  // Tu accountId real
+const apiKey = "I29W9AhcDED95Gzg80k87YzinF";     // Tu apiKey real
+const currency = "COP";
+const urlResponse = "https://jcmanosenresina.unaux.com/verificar.php";
+const urlConfirmation = "https://jcmanosenresina.unaux.com/confirmacion.php";
 
-  const apiKey = '4Vj8eK4rloUd272L48hsrarnUA';
-  const merchantId = '508029';
-  const accountId = '512321';
-  const currency = 'COP';
+app.post("/generar_pago", (req, res) => {
+  const { referenceCode, amount, buyerEmail } = req.body;
 
-  const signatureString = `${apiKey}~${merchantId}~${referenceCode}~${amount}~${currency}`;
-  const signature = crypto.createHash('md5').update(signatureString).digest('hex');
+  const signature = crypto
+    .createHash("md5")
+    .update(`${apiKey}~${merchantId}~${referenceCode}~${amount}~${currency}`)
+    .digest("hex");
 
-  const payload = {
-    language: 'es',
-    command: 'SUBMIT_TRANSACTION',
-    merchant: {
-      apiKey,
-      apiLogin: 'pRRXKOl8ikMmt9u',
-    },
-    transaction: {
-      order: {
-        accountId,
-        referenceCode,
-        description: 'Prueba desde PHP',
-        language: 'es',
-        signature,
-        notifyUrl: 'https://jcmanosenresina.unaux.com/verificar.php',
-        additionalValues: {
-          TX_VALUE: {
-            value: amount,
-            currency
-          }
-        },
-        buyer: {
-          fullName: 'Cliente Test',
-          emailAddress: 'cliente@test.com',
-          contactPhone: '3000000000',
-          dniNumber: '123456789',
-          shippingAddress: {
-            street1: 'Calle 1',
-            city: 'Bogotá',
-            state: 'Bogotá',
-            country: 'CO',
-            phone: '3000000000'
-          }
-        }
-      },
-      payer: {
-        fullName: 'Cliente Test',
-        emailAddress: 'cliente@test.com',
-        contactPhone: '3000000000',
-        dniNumber: '123456789',
-        billingAddress: {
-          street1: 'Calle 1',
-          city: 'Bogotá',
-          state: 'Bogotá',
-          country: 'CO',
-          phone: '3000000000'
-        }
-      },
-      type: 'AUTHORIZATION_AND_CAPTURE',
-      paymentMethod: 'NEQUI',
-      paymentCountry: 'CO',
-      deviceSessionId: 'abc123',
-      ipAddress: '127.0.0.1',
-      cookie: 'cookie123456',
-      userAgent: 'Mozilla/5.0'
-    },
-    test: true
-  };
+  const htmlForm = `
+    <form id="payuForm" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu">
+      <input name="merchantId"    type="hidden"  value="${merchantId}">
+      <input name="accountId"     type="hidden"  value="${accountId}">
+      <input name="description"   type="hidden"  value="Pago desde Web">
+      <input name="referenceCode" type="hidden"  value="${referenceCode}">
+      <input name="amount"        type="hidden"  value="${amount}">
+      <input name="tax"           type="hidden"  value="0">
+      <input name="taxReturnBase" type="hidden"  value="0">
+      <input name="currency"      type="hidden"  value="${currency}">
+      <input name="signature"     type="hidden"  value="${signature}">
+      <input name="test"          type="hidden"  value="0">
+      <input name="buyerEmail"    type="hidden"  value="${buyerEmail}">
+      <input name="responseUrl"   type="hidden"  value="${urlResponse}">
+      <input name="confirmationUrl" type="hidden" value="${urlConfirmation}">
+    </form>
+    <script>document.getElementById('payuForm').submit();</script>
+  `;
 
-  try {
-    const response = await axios.post(
-      'https://sandbox.api.payulatam.com/payments-api/4.0/service.cgi',
-      payload,
-      { headers: { 'Content-Type': 'application/json' } }
-    );
-    res.json(response.data);
-  } catch (err) {
-    res.status(500).json({ error: err.message, detalle: err.response?.data });
-  }
+  res.send(htmlForm);
 });
+
+app.listen(3000, () => {
+  console.log("Servidor escuchando en puerto 3000");
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor en puerto ${PORT}`);
