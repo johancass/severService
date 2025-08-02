@@ -2,9 +2,12 @@
 const express = require('express');
 const pool = require('./db');
 const axios = require('axios');
-const crypto = require('crypto');
+cconst cors = require('cors');
+onst crypto = require('crypto');
 const app = express();
 
+
+app.use(cors()); // Permitir cualquier origen temporalmente
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formulario
 
