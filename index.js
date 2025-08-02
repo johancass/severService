@@ -19,20 +19,22 @@ const apiLogin = "G8xjCg8EkTIc37s";
 const apiKey = "I29W9AhcDED95Gzg80k87YzinF"; // clave de pruebas
 const url = "https://api.payulatam.com/reports-api/4.0/service.cgi"; // URL de PRODUCCIÓN
 
+// Ruta GET: /estado_pago?ref=XXXXXX
 app.get('/estado_pago', async (req, res) => {
   const referencia = req.query.ref;
 
   if (!referencia) {
-    return res.status(400).json({ error: 'Falta la referencia' });
+    return res.status(400).json({ error: 'Referencia requerida' });
   }
 
+  // Arma el cuerpo del POST
   const body = {
     test: false,
-    language: 'en',
-    command: 'ORDER_DETAIL_BY_REFERENCE_CODE',
+    language: "en",
+    command: "ORDER_DETAIL_BY_REFERENCE_CODE",
     merchant: {
-      apiLogin: apiLogin,
-      apiKey: apiKey
+      apiLogin: "G8xjCg8EkTIc37s",       // ⚠️ Reemplaza
+      apiKey: "I29W9AhcDED95Gzg80k87YzinF"            // ⚠️ Reemplaza
     },
     details: {
       referenceCode: referencia
@@ -40,25 +42,34 @@ app.get('/estado_pago', async (req, res) => {
   };
 
   try {
-    const respuesta = await axios.post(url, body, {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const response = await axios.post(
+      'https://api.payulatam.com/reports-api/4.0/service.cgi',
+      body,
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    const data = respuesta.data;
+    const data = response.data;
 
-    // Verificamos si hay una transacción
-    const estado = data?.result?.payload?.transactions?.[0]?.transactionResponse?.state || 'NO_INFO';
+    if (!data.result || !data.result.payload || data.result.payload.length === 0) {
+      return res.json({ estado: "no_encontrado", data });
+    }
 
-    res.json({
-      referencia,
-      estado
-    });
+    // Extraer estado de transacción
+    const estado = data.result.payload[0].transactions[0].transactionResponse.state;
+    const medio = data.result.payload[0].transactions[0].paymentMethodName;
 
+    return res.json({ estado, medio });
   } catch (error) {
-    console.error('Error al consultar el estado:', error.message);
-    res.status(500).json({ error: 'No se pudo consultar el estado del pago' });
+    console.error("Error al consultar PayU:", error?.response?.data || error.message);
+    return res.status(500).json({ error: 'Error al consultar estado del pago', detalles: error?.response?.data });
   }
 });
+
+
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
