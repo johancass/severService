@@ -70,6 +70,37 @@ app.get('/estado_pago', async (req, res) => {
 });
 
 
+app.post('/webhook_wompi', express.json(), async (req, res) => {
+  const evento = req.body;
+
+  if (!evento || !evento.data || !evento.data.transaction) {
+    return res.status(400).send('Evento inválido');
+  }
+
+  const transaccion = evento.data.transaction;
+  const estado = transaccion.status; // Ej: APPROVED, DECLINED, etc.
+  const referencia = transaccion.reference;
+
+  console.log('Webhook recibido de Wompi:');
+  console.log('Referencia:', referencia);
+  console.log('Estado:', estado);
+
+  // Solo actualiza si el pago fue exitoso
+  if (estado === 'APPROVED') {
+    try {
+      const update = await pool.query(
+        'UPDATE pagos SET estado = $1 WHERE codigo = $2',
+        ['pagado', referencia]
+      );
+      console.log('Pago actualizado a "pagado"');
+    } catch (err) {
+      console.error('Error actualizando estado del pago:', err.message);
+    }
+  }
+
+  res.sendStatus(200); // Wompi espera esta respuesta
+});
+
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
