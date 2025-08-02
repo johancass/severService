@@ -13,22 +13,26 @@ app.get('/', (req, res) => {
   res.json({ mensaje: 'Servidor activo' });
 });
 // Ruta directa: /estado_pago?ref=XXXXXX
+const merchantId = "1018562"; // Tu merchantId real
+const accountId = "1027555";  // Tu accountId real
+const apiLogin = "G8xjCg8EkTIc37s";
+const apiKey = "I29W9AhcDED95Gzg80k87YzinF"; // clave de pruebas
+const url = "https://api.payulatam.com/reports-api/4.0/service.cgi"; // URL de PRODUCCIÓN
+
 app.get('/estado_pago', async (req, res) => {
   const referencia = req.query.ref;
 
   if (!referencia) {
-    return res.status(400).json({ error: 'Referencia requerida' });
+    return res.status(400).json({ error: 'Falta la referencia' });
   }
-
-  const url = 'https://checkout.payulatam.com/ppp-web-gateway-payu'; // cambia a producción si aplica
 
   const body = {
     test: false,
-    language: 'es',
+    language: 'en',
     command: 'ORDER_DETAIL_BY_REFERENCE_CODE',
     merchant: {
-      apiKey: API_KEY,
-      apiLogin: API_LOGIN
+      apiLogin: apiLogin,
+      apiKey: apiKey
     },
     details: {
       referenceCode: referencia
@@ -40,22 +44,21 @@ app.get('/estado_pago', async (req, res) => {
       headers: { 'Content-Type': 'application/json' }
     });
 
-    const resultado = respuesta.data;
+    const data = respuesta.data;
 
-    if (!resultado.result || !resultado.result.payload) {
-      return res.status(404).json({ estado: 'NO_ENCONTRADO' });
-    }
+    // Verificamos si hay una transacción
+    const estado = data?.result?.payload?.transactions?.[0]?.transactionResponse?.state || 'NO_INFO';
 
-    const pago = resultado.result.payload;
-    const estadoPago = pago.transactions?.[0]?.transactionResponse?.state || 'PENDING';
+    res.json({
+      referencia,
+      estado
+    });
 
-    return res.json({ estado: estadoPago });
-  } catch (err) {
-    console.error('Error al consultar estado:', err.message);
-    return res.status(500).json({ error: 'Error al consultar el estado del pago' });
+  } catch (error) {
+    console.error('Error al consultar el estado:', error.message);
+    res.status(500).json({ error: 'No se pudo consultar el estado del pago' });
   }
 });
-
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
@@ -122,9 +125,7 @@ app.get('/estado_pago', async (req, res) => {
   }
 });
 
-const merchantId = "1018562"; // Tu merchantId real
-const accountId = "1027555";  // Tu accountId real
-const apiKey = "I29W9AhcDED95Gzg80k87YzinF";     // Tu apiKey real
+
 const currency = "COP";
 const urlResponse = "https://jcmanosenresina.unaux.com/verificar.php";
 const urlConfirmation = "https://jcmanosenresina.unaux.com/confirmacion.php";
