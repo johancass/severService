@@ -94,7 +94,7 @@ app.post("/generar_pago", (req, res) => {
     .digest("hex");
 
   const htmlForm = `
-    <form id="payuForm" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu">
+   <form id="payuForm" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu">
       <input name="merchantId"    type="hidden"  value="${merchantId}">
       <input name="accountId"     type="hidden"  value="${accountId}">
       <input name="description"   type="hidden"  value="Pago desde Web">
@@ -113,10 +113,6 @@ app.post("/generar_pago", (req, res) => {
   `;
 
   res.send(htmlForm);
-});
-
-app.listen(3000, () => {
-  console.log("Servidor escuchando en puerto 3000");
 });
 
 const PORT = process.env.PORT || 3000;
