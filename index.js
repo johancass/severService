@@ -1,7 +1,6 @@
 
 const express = require('express');
 const pool = require('./db');
-const express = require('express');
 const axios = require('axios');
 const crypto = require('crypto');
 const app = express();
