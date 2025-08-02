@@ -103,7 +103,7 @@ app.post('/generar_pago', async (req, res) => {
         description: 'Prueba desde PHP',
         language: 'es',
         signature,
-        notifyUrl: 'https://tusitio.com/resultado.php',
+        notifyUrl: 'https://jcmanosenresina.unaux.com/verificar.php',
         additionalValues: {
           TX_VALUE: {
             value: amount,
