@@ -1,14 +1,17 @@
 
 const express = require('express');
 const pool = require('./db');
+const app = express();
+const cors = require('cors');
 const axios = require('axios');
 const crypto = require('crypto');
-const app = express();
-
-
+// Middleware para que acepte JSON
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formulario
-
+app.get('/', (req, res) => {
+  res.json({ mensaje: 'Servidor activo' });
+});
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
   const { id_pago, valor } = req.body;
