@@ -20,7 +20,7 @@ app.get('/estado_pago', async (req, res) => {
     return res.status(400).json({ error: 'Referencia requerida' });
   }
 
-  const url = 'https://sandbox.api.payulatam.com/reports-api/4.0/service.cgi'; // cambia a producción si aplica
+  const url = 'https://checkout.payulatam.com/ppp-web-gateway-payu'; // cambia a producción si aplica
 
   const body = {
     test: false,
