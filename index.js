@@ -42,34 +42,38 @@ app.post('/firmar_wompi', (req, res) => {
 
 
 
-
-// Ruta webhook para Wompi
-app.post('/webhook_wompi', (req, res) => {
+app.post('/webhook_wompi', async (req, res) => {
   try {
     const evento = req.body.event;
     const transaccion = req.body.data?.transaction;
 
-    console.log('⚡ Webhook recibido:');
-    console.log(JSON.stringify(req.body, null, 2));
-
     if (evento === 'transaction.updated' && transaccion) {
-      const referencia = transaccion.reference;
+      const id_pago = transaccion.reference;
+      const valor = transaccion.amount_in_cents / 100;
       const estado = transaccion.status;
 
-      console.log(`➡️ Pago con referencia ${referencia} cambió a estado: ${estado}`);
+      // Guardar directamente en la base de datos Neon
+      const resultado = await pool.query(
+        'INSERT INTO pagos (codigo, valor, estado) VALUES ($1, $2, $3) RETURNING *',
+        [id_pago, valor, estado]
+      );
 
-      // Aquí puedes guardar en tu BD el estado o hacer acciones
-      // Ej: actualizar la orden en PlanetScale o enviar confirmación por email
-
+      console.log('✅ Pago registrado:', resultado.rows[0]);
+      res.status(200).send('OK');
     } else {
-      console.log('❗ Evento no esperado:', evento);
+      console.warn('📭 Webhook recibido pero sin transacción válida.');
+      res.status(400).send('Sin datos válidos');
     }
 
-    res.status(200).send('OK');
-  } catch (err) {
-    console.error('❌ Error procesando webhook:', err);
-    res.status(500).send('Error');
+  } catch (error) {
+    console.error('❌ Error al procesar el webhook:', error);
+    res.status(500).send('Error al procesar');
   }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Webhook escuchando en http://localhost:${PORT}`);
 });
 
 // Ruta para registrar un pago
