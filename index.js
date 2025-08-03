@@ -12,62 +12,7 @@ app.use(express.urlencoded({ extended: true })); // ✅ para datos tipo formular
 app.get('/', (req, res) => {
   res.json({ mensaje: 'Servidor activo' });
 });
-// Ruta directa: /estado_pago?ref=XXXXXX
-const merchantId = "1018562"; // Tu merchantId real
-const accountId = "1027555";  // Tu accountId real
-const apiLogin = "G8xjCg8EkTIc37s";
-const apiKey = "I29W9AhcDED95Gzg80k87YzinF"; // clave de pruebas
-const url = "https://api.payulatam.com/reports-api/4.0/service.cgi"; // URL de PRODUCCIÓN
 
-// Ruta GET: /estado_pago?ref=XXXXXX
-app.get('/estado_pago', async (req, res) => {
-  const referencia = req.query.ref;
-
-  if (!referencia) {
-    return res.status(400).json({ error: 'Referencia requerida' });
-  }
-
-  // Arma el cuerpo del POST
-  const body = {
-    test: false,
-    language: "en",
-    command: "ORDER_DETAIL_BY_REFERENCE_CODE",
-    merchant: {
-      apiLogin: "G8xjCg8EkTIc37s",       // ⚠️ Reemplaza
-      apiKey: "I29W9AhcDED95Gzg80k87YzinF"            // ⚠️ Reemplaza
-    },
-    details: {
-      referenceCode: referencia
-    }
-  };
-
-  try {
-    const response = await axios.post(
-      'https://api.payulatam.com/reports-api/4.0/service.cgi',
-      body,
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    const data = response.data;
-
-    if (!data.result || !data.result.payload || data.result.payload.length === 0) {
-      return res.json({ estado: "no_encontrado", data });
-    }
-
-    // Extraer estado de transacción
-    const estado = data.result.payload[0].transactions[0].transactionResponse.state;
-    const medio = data.result.payload[0].transactions[0].paymentMethodName;
-
-    return res.json({ estado, medio });
-  } catch (error) {
-    console.error("Error al consultar PayU:", error?.response?.data || error.message);
-    return res.status(500).json({ error: 'Error al consultar estado del pago', detalles: error?.response?.data });
-  }
-});
 
 
 app.post('/webhook_wompi', express.json(), async (req, res) => {
