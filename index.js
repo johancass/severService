@@ -43,34 +43,36 @@ app.post('/firmar_wompi',async (req, res) => {
 
 
 
-app.post('/webhook_wompi', async (req, res) => {
+router.post('/webhook_wompi', async (req, res) => {
   try {
-    const evento = req.body.event;
-    const transaccion = req.body.data?.transaction;
+    const data = req.body;
 
-    if (evento === 'transaction.updated' && transaccion) {
-      const id_pago = transaccion.reference;
-      const valor = transaccion.amount_in_cents / 100;
-      const estado = transaccion.status;
+    const codigo = data.transaction?.reference || 'SIN_REFERENCIA';
+    const estado = data.transaction?.status || 'DESCONOCIDO';
+    const valor = data.transaction?.amount_in_cents / 100 || 0;
 
-      // Guardar directamente en la base de datos Neon
-      const resultado = await pool.query(
-        'INSERT INTO pagos (codigo, valor, estado) VALUES ($1, $2, $3) RETURNING *',
-        [id_pago, valor, estado]
-      );
+    // 1. Verifica si el código ya existe
+    const existe = await pool.query('SELECT * FROM pagos WHERE codigo = $1', [codigo]);
 
-      console.log('✅ Pago registrado:', resultado.rows[0]);
-      res.status(200).send('OK');
+    if (existe.rows.length > 0) {
+      // 2. Si existe, actualiza el estado
+      await pool.query('UPDATE pagos SET estado = $1 WHERE codigo = $2', [estado, codigo]);
     } else {
-      console.warn('📭 Webhook recibido pero sin transacción válida.');
-      res.status(400).send('Sin datos válidos');
+      // 3. Si no existe, lo crea
+      await pool.query(
+        'INSERT INTO pagos (codigo, valor, estado) VALUES ($1, $2, $3)',
+        [codigo, valor, estado]
+      );
     }
 
+    res.status(200).send('OK');
   } catch (error) {
-    console.error('❌ Error al procesar el webhook:', error);
-    res.status(500).send('Error al procesar');
+    console.error('Error al procesar webhook:', error);
+    res.status(500).send('Error del servidor');
   }
 });
+
+module.exports = router;
 
 // Ruta para registrar un pago
 app.post('/crear_pago', async (req, res) => {
