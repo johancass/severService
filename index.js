@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 
 
 // Endpoint para firmar datos de Wompi
-app.post('/firmar_wompi', (req, res) => {
+app.post('/firmar_wompi',async (req, res) => {
   const {
     reference,
     amount_in_cents,
