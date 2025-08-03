@@ -43,28 +43,33 @@ app.post('/firmar_wompi', (req, res) => {
 
 
 
-app.post('/webhook_wompi', express.json(), async (req, res) => {
-  const evento = req.body;
+// Ruta webhook para Wompi
+app.post('/webhook_wompi', (req, res) => {
+  try {
+    const evento = req.body.event;
+    const transaccion = req.body.data?.transaction;
 
-  if (!evento || !evento.data || !evento.data.transaction) {
-    return res.status(400).send('Evento inválido');
+    console.log('⚡ Webhook recibido:');
+    console.log(JSON.stringify(req.body, null, 2));
+
+    if (evento === 'transaction.updated' && transaccion) {
+      const referencia = transaccion.reference;
+      const estado = transaccion.status;
+
+      console.log(`➡️ Pago con referencia ${referencia} cambió a estado: ${estado}`);
+
+      // Aquí puedes guardar en tu BD el estado o hacer acciones
+      // Ej: actualizar la orden en PlanetScale o enviar confirmación por email
+
+    } else {
+      console.log('❗ Evento no esperado:', evento);
+    }
+
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('❌ Error procesando webhook:', err);
+    res.status(500).send('Error');
   }
-
-  const transaccion = evento.data.transaction;
-  const estado = transaccion.status; // Ej: APPROVED, DECLINED, etc.
-  const referencia = transaccion.reference;
-
-  console.log('Webhook recibido de Wompi:');
-  console.log('Referencia:', referencia);
-  console.log('Estado:', estado);
-
-  // Solo actualiza si el pago fue exitoso
-  const update = await pool.query(
-        'UPDATE pagos SET estado = $1 WHERE codigo = $2',
-        ['pagado', estado]
-      );
-
-  res.sendStatus(200); // Wompi espera esta respuesta
 });
 
 // Ruta para registrar un pago
