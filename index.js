@@ -14,6 +14,34 @@ app.get('/', (req, res) => {
 });
 
 
+// Endpoint para firmar datos de Wompi
+app.post('/firmar_wompi', (req, res) => {
+  const {
+    reference,
+    amount_in_cents,
+    currency,
+    public_key
+  } = req.body;
+
+  // Clave secreta desde variable de entorno (más seguro)
+  const integrity_key = process.env.WOMPI_SECRET_KEY;
+
+  if (!reference || !amount_in_cents || !currency || !public_key || !integrity_key) {
+    return res.status(400).json({ ok: false, error: 'Faltan parámetros o clave secreta' });
+  }
+
+  try {
+    const cadena = `${reference}${amount_in_cents}${currency}${public_key}${integrity_key}`;
+    const hash = crypto.createHash('sha256').update(cadena).digest('hex');
+    res.json({ ok: true, signature: hash });
+  } catch (err) {
+    console.error('Error generando firma:', err);
+    res.status(500).json({ ok: false, error: 'Error interno generando firma' });
+  }
+});
+
+
+
 
 app.post('/webhook_wompi', express.json(), async (req, res) => {
   const evento = req.body;
