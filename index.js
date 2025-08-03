@@ -133,6 +133,9 @@ console.log("Tu variable:", process.env.DATABASE_URL);
 app.get('/estado_pago', async (req, res) => {
   const codigo = req.query.codigoin;
 
+  console.log('REQ QUERY:', req.query);
+  console.log('Código recibido:', codigo);
+
   if (!codigo) {
     return res.status(400).json({
       ok: false,
@@ -145,6 +148,8 @@ app.get('/estado_pago', async (req, res) => {
       'SELECT * FROM pagos WHERE codigo = $1',
       [codigo]
     );
+
+    console.log('Resultado:', resultado.rows);
 
     if (resultado.rows.length === 0) {
       return res.status(404).json({
@@ -168,39 +173,7 @@ app.get('/estado_pago', async (req, res) => {
 });
 
 
-const currency = "COP";
-const urlResponse = "https://jcmanosenresina.unaux.com/verificar.php";
-const urlConfirmation = "https://jcmanosenresina.unaux.com/confirmacion.php";
 
-app.post("/generar_pago", (req, res) => {
-  const { referenceCode, amount, buyerEmail } = req.body;
-
-  const signature = crypto
-    .createHash("md5")
-    .update(`${apiKey}~${merchantId}~${referenceCode}~${amount}~${currency}`)
-    .digest("hex");
-
-  const htmlForm = `
-   <form id="payuForm" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu">
-      <input name="merchantId"    type="hidden"  value="${merchantId}">
-      <input name="accountId"     type="hidden"  value="${accountId}">
-      <input name="description"   type="hidden"  value="Pago desde Web">
-      <input name="referenceCode" type="hidden"  value="${referenceCode}">
-      <input name="amount"        type="hidden"  value="${amount}">
-      <input name="tax"           type="hidden"  value="0">
-      <input name="taxReturnBase" type="hidden"  value="0">
-      <input name="currency"      type="hidden"  value="${currency}">
-      <input name="signature"     type="hidden"  value="${signature}">
-      <input name="test"          type="hidden"  value="0">
-      <input name="buyerEmail"    type="hidden"  value="${buyerEmail}">
-      <input name="responseUrl"   type="hidden"  value="${urlResponse}">
-      <input name="confirmationUrl" type="hidden" value="${urlConfirmation}">
-    </form>
-    <script>document.getElementById('payuForm').submit();</script>
-  `;
-
-  res.send(htmlForm);
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
