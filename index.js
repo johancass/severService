@@ -42,6 +42,7 @@ app.post('/firmar_wompi',async (req, res) => {
 
 
 
+
 app.post('/webhook_wompi', async (req, res) => {
   try {
     const evento = req.body.event;
@@ -69,11 +70,6 @@ app.post('/webhook_wompi', async (req, res) => {
     console.error('❌ Error al procesar el webhook:', error);
     res.status(500).send('Error al procesar');
   }
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Webhook escuchando en http://localhost:${PORT}`);
 });
 
 // Ruta para registrar un pago
