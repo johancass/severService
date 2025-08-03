@@ -31,17 +31,10 @@ app.post('/webhook_wompi', express.json(), async (req, res) => {
   console.log('Estado:', estado);
 
   // Solo actualiza si el pago fue exitoso
-  if (estado === 'APPROVED') {
-    try {
-      const update = await pool.query(
+  const update = await pool.query(
         'UPDATE pagos SET estado = $1 WHERE codigo = $2',
-        ['pagado', referencia]
+        ['pagado', estado]
       );
-      console.log('Pago actualizado a "pagado"');
-    } catch (err) {
-      console.error('Error actualizando estado del pago:', err.message);
-    }
-  }
 
   res.sendStatus(200); // Wompi espera esta respuesta
 });
