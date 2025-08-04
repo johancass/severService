@@ -40,7 +40,32 @@ app.post('/firmar_wompi',async (req, res) => {
   }
 });
 
+app.post('/ActualizaStd', async (req, res) => {
+  try {
+    const { codigoPago, estado } = req.body;
 
+    if (!codigo || !estado) {
+      return res.status(400).json({ mensaje: 'Faltan parámetros: codigo o estado' });
+    }
+
+    const resultado = await pool.query(
+      `UPDATE pagos SET estado = $1 WHERE codigo = $2 RETURNING *`,
+      [estado, codigo]
+    );
+
+    if (resultado.rowCount === 0) {
+      // No se encontró ese código
+      return res.status(404).json({ mensaje: '❌ No se encontró el código para actualizar' });
+    }
+
+    console.log('✅ Estado actualizado:', resultado.rows[0]);
+    res.status(200).json({ mensaje: '✅ Estado actualizado correctamente', data: resultado.rows[0] });
+
+  } catch (error) {
+    console.error('❌ Error al actualizar estado:', error);
+    res.status(500).json({ mensaje: '❌ Error interno al actualizar el estado' });
+  }
+});
 
 app.post('/webhook_wompi', async (req, res) => {
   try {
