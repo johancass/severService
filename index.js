@@ -42,7 +42,7 @@ app.post('/firmar_wompi',async (req, res) => {
 
 app.post('/ActualizaStd', async (req, res) => {
   try {
-    const { codigoPago, estado } = req.body;
+    const { codigo, estado } = req.body;
 
     if (!codigo || !estado) {
       return res.status(400).json({ mensaje: 'Faltan parámetros: codigo o estado' });
